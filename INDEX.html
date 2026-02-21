@@ -1,0 +1,462 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Викторина «Моя семья» (2 команды)</title>
+  <style>
+    :root{
+      --bg1:#7c3aed;
+      --bg2:#06b6d4;
+      --bg3:#f59e0b;
+      --card:#ffffff;
+      --text:#0f172a;
+      --muted:#64748b;
+      --good:#16a34a;
+      --bad:#dc2626;
+      --ring:rgba(255,255,255,.35);
+    }
+    *{box-sizing:border-box}
+    body{
+      margin:0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      color:var(--text);
+      background: radial-gradient(1200px 600px at 15% 10%, rgba(255,255,255,.28), transparent 60%),
+                  radial-gradient(900px 500px at 85% 20%, rgba(255,255,255,.22), transparent 55%),
+                  linear-gradient(135deg, var(--bg1), var(--bg2) 45%, var(--bg3));
+      min-height:100vh;
+      display:flex;
+      justify-content:center;
+      padding:24px;
+    }
+    .app{width:min(980px, 100%); display:grid; gap:16px;}
+    .topbar{display:flex; gap:12px; flex-wrap:wrap; align-items:center; justify-content:space-between;}
+    .brand{display:flex; align-items:center; gap:12px;}
+    .logo{
+      width:44px;height:44px;border-radius:14px;
+      background: rgba(255,255,255,.25);
+      border:1px solid var(--ring);
+      display:grid;place-items:center;
+      box-shadow: 0 10px 25px rgba(0,0,0,.18);
+      backdrop-filter: blur(6px);
+    }
+    .logo span{font-size:22px}
+    .title h1{margin:0;font-size:18px;letter-spacing:.2px;color:white;text-shadow:0 2px 14px rgba(0,0,0,.25);}
+    .title p{margin:2px 0 0;color: rgba(255,255,255,.85);font-size:13px;}
+    .panel{
+      background: rgba(255,255,255,.18);
+      border:1px solid var(--ring);
+      border-radius:18px;
+      padding:12px;
+      display:flex;
+      gap:10px;
+      flex-wrap:wrap;
+      align-items:center;
+      justify-content:flex-end;
+      backdrop-filter: blur(8px);
+      box-shadow: 0 14px 28px rgba(0,0,0,.18);
+    }
+    button{
+      cursor:pointer;border:none;border-radius:14px;padding:10px 12px;
+      font-weight:700;letter-spacing:.2px;
+      background: rgba(255,255,255,.92); color: var(--text);
+      box-shadow: 0 10px 18px rgba(0,0,0,.15);
+      transition: transform .08s ease, filter .12s ease;
+    }
+    button:active{transform: translateY(1px) scale(.99)}
+    button.secondary{
+      background: rgba(15,23,42,.12);
+      color: white;
+      border:1px solid rgba(255,255,255,.35);
+      box-shadow:none;
+    }
+    .grid{display:grid; grid-template-columns: 1.2fr .8fr; gap:16px;}
+    @media (max-width: 860px){ .grid{grid-template-columns: 1fr} }
+    .card{
+      background: rgba(255,255,255,.92);
+      border: 1px solid rgba(255,255,255,.6);
+      border-radius:22px;
+      padding:18px;
+      box-shadow: 0 18px 40px rgba(0,0,0,.18);
+    }
+    .card h2{margin:0 0 10px;font-size:18px;}
+    .meta{display:flex; gap:10px; flex-wrap:wrap; align-items:center; justify-content:space-between; margin-bottom:10px;}
+    .pill{
+      display:inline-flex; align-items:center; gap:8px;
+      padding:8px 10px; border-radius:999px;
+      background: rgba(2,6,23,.06);
+      color: var(--text);
+      font-weight:700; font-size:13px;
+    }
+    .pill strong{font-weight:900}
+    .turn{
+      background: linear-gradient(90deg, rgba(124,58,237,.12), rgba(6,182,212,.12));
+      border:1px solid rgba(2,6,23,.08);
+    }
+    .qbox{
+      background: rgba(2,6,23,.04);
+      border:1px solid rgba(2,6,23,.08);
+      border-radius:18px;
+      padding:14px;
+      margin:10px 0 14px;
+    }
+    .qbox .qnum{color:var(--muted); font-size:13px; font-weight:800; margin-bottom:6px}
+    .qbox .qtext{font-size:18px; font-weight:900; line-height:1.25}
+    .answers{
+      display:grid;
+      grid-template-columns: 1fr 1fr;
+      gap:10px;
+      margin-top:10px;
+    }
+    @media (max-width: 520px){ .answers{grid-template-columns:1fr} }
+    .ans{
+      padding:12px 12px;
+      border-radius:16px;
+      background: white;
+      border:1px solid rgba(2,6,23,.10);
+      box-shadow: 0 10px 18px rgba(0,0,0,.08);
+      font-weight:800;
+      text-align:left;
+      display:flex;
+      gap:10px;
+      align-items:flex-start;
+    }
+    .ans:hover{filter: brightness(1.02)}
+    .ans .label{
+      width:26px;height:26px;border-radius:10px;
+      display:grid; place-items:center;
+      background: rgba(124,58,237,.12);
+      font-weight:900;
+    }
+    .ans[disabled]{cursor:not-allowed;opacity:.72;box-shadow:none;}
+    .status{
+      margin-top:10px;
+      padding:12px 14px;
+      border-radius:16px;
+      font-weight:800;
+      display:flex;
+      align-items:center;
+      gap:10px;
+      border:1px solid rgba(2,6,23,.08);
+      background: rgba(2,6,23,.04);
+    }
+    .status.good{background: rgba(22,163,74,.10); border-color: rgba(22,163,74,.25)}
+    .status.bad{background: rgba(220,38,38,.10); border-color: rgba(220,38,38,.25)}
+    .status .dot{width:10px;height:10px;border-radius:50%;background: rgba(100,116,139,.9);}
+    .status.good .dot{background: var(--good)}
+    .status.bad .dot{background: var(--bad)}
+    .scoreboard{display:grid; gap:12px;}
+    .team{
+      border-radius:20px;
+      padding:14px;
+      border:1px solid rgba(255,255,255,.45);
+      background: linear-gradient(180deg, rgba(255,255,255,.22), rgba(255,255,255,.10));
+      backdrop-filter: blur(8px);
+      color:white;
+      box-shadow: 0 14px 26px rgba(0,0,0,.18);
+    }
+    .team h3{
+      margin:0; display:flex; align-items:center; justify-content:space-between; gap:10px;
+      font-size:16px; text-shadow:0 2px 14px rgba(0,0,0,.25);
+    }
+    .team .pts{font-size:24px;font-weight:1000;letter-spacing:.4px;}
+    .team .sub{
+      margin-top:6px;
+      color: rgba(255,255,255,.88);
+      font-size:13px;
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      flex-wrap:wrap;
+    }
+    .hint{
+      margin-top:12px;
+      color: rgba(255,255,255,.92);
+      font-size:13px;
+      line-height:1.35;
+      background: rgba(255,255,255,.12);
+      border:1px solid rgba(255,255,255,.28);
+      border-radius:18px;
+      padding:12px 14px;
+      backdrop-filter: blur(8px);
+    }
+    .finish{display:none;margin-top:10px;padding:14px;border-radius:18px;background: rgba(255,255,255,.92);border:1px solid rgba(255,255,255,.55);box-shadow: 0 18px 40px rgba(0,0,0,.18);}
+    .finish.show{display:block}
+    .finish h2{margin:0 0 8px}
+    .finish p{margin:6px 0;font-weight:800}
+  </style>
+</head>
+<body>
+  <div class="app">
+    <div class="topbar">
+      <div class="brand">
+        <div class="logo"><span>👨‍👩‍👧‍👦</span></div>
+        <div class="title">
+          <h1>Викторина «Моя семья»</h1>
+          <p>2 команды • 20 вопросов • +10 баллов за правильный ответ • при ошибке ход переходит</p>
+        </div>
+      </div>
+      <div class="panel">
+        <button id="btnStart">Начать игру</button>
+        <button id="btnNext" class="secondary" disabled>Следующий вопрос</button>
+        <button id="btnReset" class="secondary">Сброс</button>
+      </div>
+    </div>
+
+    <div class="grid">
+      <div class="card">
+        <div class="meta">
+          <div class="pill"><span>Вопрос:</span> <strong id="qCounter">0/20</strong></div>
+          <div class="pill turn"><span>Ход:</span> <strong id="turnName">—</strong></div>
+        </div>
+
+        <div class="qbox">
+          <div class="qnum" id="qNum">Нажмите «Начать игру»</div>
+          <div class="qtext" id="qText">Здесь появится вопрос и варианты ответа.</div>
+        </div>
+
+        <div class="answers" id="answers"></div>
+
+        <div class="status" id="status">
+          <span class="dot"></span>
+          <span id="statusText">Нажмите «Начать игру».</span>
+        </div>
+
+        <div class="finish" id="finishBox">
+          <h2>Игра окончена 🎉</h2>
+          <p id="winnerText"></p>
+          <p id="finalScore"></p>
+        </div>
+      </div>
+
+      <div class="scoreboard">
+        <div class="team">
+          <h3><span>Команда 1</span><span class="pts" id="scoreA">0</span></h3>
+          <div class="sub">
+            <span>Правильных: <strong id="rightA">0</strong></span>
+            <span>Ошибок: <strong id="wrongA">0</strong></span>
+          </div>
+        </div>
+
+        <div class="team">
+          <h3><span>Команда 2</span><span class="pts" id="scoreB">0</span></h3>
+          <div class="sub">
+            <span>Правильных: <strong id="rightB">0</strong></span>
+            <span>Ошибок: <strong id="wrongB">0</strong></span>
+          </div>
+        </div>
+
+        <div class="hint">
+          <b>Правила:</b> отвечает команда, чей ход указан сверху. За правильный ответ +10. Если ответ неверный — право ответа переходит другой команде на тот же вопрос. После правильного ответа нажмите «Следующий вопрос».
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ======= 20 вопросов «Моя семья» =======
+    const QUESTIONS = [
+      { q: "Кто такие родители?", a: ["Мама и папа", "Только друзья", "Соседи", "Игрушки"], correct: 0 },
+      { q: "Как называют маму мамы?", a: ["Бабушка", "Тётя", "Сестра", "Подруга"], correct: 0 },
+      { q: "Как называют папу папы?", a: ["Дедушка", "Брат", "Сосед", "Воспитатель"], correct: 0 },
+      { q: "Как называют сына или дочь твоих родителей?", a: ["Брат или сестра", "Дедушка", "Тётя", "Сосед"], correct: 0 },
+      { q: "Что важно делать в семье?", a: ["Помогать друг другу", "Ссориться каждый день", "Не разговаривать", "Ломать вещи"], correct: 0 },
+      { q: "Как можно показать уважение к старшим?", a: ["Слушать и вежливо отвечать", "Кричать", "Перебивать", "Обзываться"], correct: 0 },
+      { q: "Что нужно сказать, если ты случайно сделал ошибку?", a: ["Извини", "Я не виноват", "Сам виноват", "Мне всё равно"], correct: 0 },
+      { q: "Как называется семья, где есть мама, папа и дети?", a: ["Семья", "Класс", "Команда", "Улица"], correct: 0 },
+      { q: "Что можно делать вместе всей семьёй?", a: ["Гулять", "Драться", "Обзываться", "Портить вещи"], correct: 0 },
+      { q: "Кто такие родственники?", a: ["Люди одной семьи", "Только одноклассники", "Покупатели в магазине", "Прохожие"], correct: 0 },
+      { q: "Как правильно попросить о помощи дома?", a: ["Пожалуйста, помоги мне", "Эй, быстро!", "Сделай за меня!", "Мне не нужно"], correct: 0 },
+      { q: "Что такое домашние обязанности?", a: ["Дела по дому", "Только игры", "Только уроки в школе", "Только прогулки"], correct: 0 },
+      { q: "Что делает семью дружной?", a: ["Доброта и забота", "Ссоры", "Обиды", "Крики"], correct: 0 },
+      { q: "Как можно порадовать маму или папу?", a: ["Помочь и сказать добрые слова", "Разбросать вещи", "Кричать", "Спрятать тетради"], correct: 0 },
+      { q: "Что нужно делать, если дома кто-то расстроен?", a: ["Поддержать и поговорить", "Смеяться", "Дразнить", "Уйти и хлопнуть дверью"], correct: 0 },
+      { q: "Как называют папиного брата?", a: ["Дядя", "Бабушка", "Сестра", "Подруга"], correct: 0 },
+      { q: "Как называют мамину сестру?", a: ["Тётя", "Дедушка", "Брат", "Сосед"], correct: 0 },
+      { q: "Что обычно делают на семейных праздниках?", a: ["Поздравляют и проводят время вместе", "Ссорятся", "Обзываются", "Ломают подарки"], correct: 0 },
+      { q: "Что помогает решать спор в семье?", a: ["Спокойный разговор", "Крик", "Драка", "Обиды навсегда"], correct: 0 },
+      { q: "Что значит «забота» в семье?", a: ["Помогать и поддерживать", "Ругать всех", "Не замечать друг друга", "Делать только себе"], correct: 0 },
+    ];
+
+    // ======= Состояние игры =======
+    const state = {
+      started: false,
+      index: -1,
+      turn: 0, // 0 = Команда 1, 1 = Команда 2
+      locked: false,
+      answeredCorrectly: false,
+      scoreA: 0, scoreB: 0,
+      rightA: 0, rightB: 0,
+      wrongA: 0, wrongB: 0
+    };
+
+    // ======= UI =======
+    const qCounter = document.getElementById('qCounter');
+    const turnName = document.getElementById('turnName');
+    const qNum = document.getElementById('qNum');
+    const qText = document.getElementById('qText');
+    const answersBox = document.getElementById('answers');
+    const status = document.getElementById('status');
+    const statusText = document.getElementById('statusText');
+    const finishBox = document.getElementById('finishBox');
+    const winnerText = document.getElementById('winnerText');
+    const finalScore = document.getElementById('finalScore');
+
+    const scoreA = document.getElementById('scoreA');
+    const scoreB = document.getElementById('scoreB');
+    const rightA = document.getElementById('rightA');
+    const rightB = document.getElementById('rightB');
+    const wrongA = document.getElementById('wrongA');
+    const wrongB = document.getElementById('wrongB');
+
+    const btnStart = document.getElementById('btnStart');
+    const btnNext = document.getElementById('btnNext');
+    const btnReset = document.getElementById('btnReset');
+
+    function teamLabel(t){ return t === 0 ? "Команда 1" : "Команда 2"; }
+    function setStatus(type, text){
+      status.classList.remove('good','bad');
+      if(type) status.classList.add(type);
+      statusText.textContent = text;
+    }
+    function updateScoreUI(){
+      scoreA.textContent = state.scoreA;
+      scoreB.textContent = state.scoreB;
+      rightA.textContent = state.rightA;
+      rightB.textContent = state.rightB;
+      wrongA.textContent = state.wrongA;
+      wrongB.textContent = state.wrongB;
+    }
+    function updateTopUI(){
+      qCounter.textContent = `${Math.max(state.index+1,0)}/${QUESTIONS.length}`;
+      turnName.textContent = state.started ? teamLabel(state.turn) : "—";
+    }
+    function setLocked(v){
+      state.locked = v;
+      [...answersBox.querySelectorAll('button.ans')].forEach(b => b.disabled = v);
+    }
+
+    function renderQuestion(){
+      const i = state.index;
+      const item = QUESTIONS[i];
+      qNum.textContent = `Вопрос ${i+1} из ${QUESTIONS.length}`;
+      qText.textContent = item.q;
+
+      answersBox.innerHTML = '';
+      const letters = ["A","B","C","D"];
+      item.a.forEach((txt, idx) => {
+        const btn = document.createElement('button');
+        btn.className = 'ans';
+        btn.type = 'button';
+        btn.disabled = state.locked;
+        btn.innerHTML = `<span class="label">${letters[idx]}</span><span>${txt}</span>`;
+        btn.addEventListener('click', () => chooseAnswer(idx));
+        answersBox.appendChild(btn);
+      });
+
+      updateTopUI();
+      btnNext.disabled = true;
+      finishBox.classList.remove('show');
+      setStatus(null, `Отвечает ${teamLabel(state.turn)}. Выберите вариант.`);
+    }
+
+    function chooseAnswer(selectedIdx){
+      if(!state.started) return;
+      if(state.answeredCorrectly) return;
+
+      const item = QUESTIONS[state.index];
+      const isCorrect = selectedIdx === item.correct;
+      const currentTeam = state.turn;
+
+      if(isCorrect){
+        if(currentTeam === 0){ state.scoreA += 10; state.rightA += 1; }
+        else { state.scoreB += 10; state.rightB += 1; }
+        updateScoreUI();
+
+        state.answeredCorrectly = true;
+        btnNext.disabled = false;
+        setStatus('good', `Верно! +10 баллов для ${teamLabel(currentTeam)}. Нажмите «Следующий вопрос».`);
+        setLocked(true);
+        return;
+      }
+
+      if(currentTeam === 0) state.wrongA += 1; else state.wrongB += 1;
+      updateScoreUI();
+
+      state.turn = currentTeam === 0 ? 1 : 0;
+      updateTopUI();
+      setStatus('bad', `Неверно. Теперь отвечает ${teamLabel(state.turn)} (тот же вопрос).`);
+    }
+
+    function nextQuestion(){
+      if(!state.started) return;
+      if(!state.answeredCorrectly) return;
+
+      state.index += 1;
+      state.answeredCorrectly = false;
+      setLocked(false);
+
+      if(state.index >= QUESTIONS.length){
+        endGame();
+        return;
+      }
+      renderQuestion();
+    }
+
+    function startGame(){
+      if(state.started) return;
+      state.started = true;
+      state.index = 0;
+      state.turn = 0; // начинает Команда 1
+      state.answeredCorrectly = false;
+      setLocked(false);
+      btnStart.disabled = true;
+      renderQuestion();
+    }
+
+    function endGame(){
+      setLocked(true);
+      btnNext.disabled = true;
+
+      finishBox.classList.add('show');
+      const a = state.scoreA, b = state.scoreB;
+      if(a > b) winnerText.textContent = "Победила Команда 1! 🏆";
+      else if(b > a) winnerText.textContent = "Победила Команда 2! 🏆";
+      else winnerText.textContent = "Ничья! 🤝";
+
+      finalScore.textContent = `Итоговый счёт: Команда 1 — ${a} | Команда 2 — ${b}`;
+      setStatus(null, "Игра завершена. Можно нажать «Сброс» и сыграть снова.");
+    }
+
+    function resetGame(){
+      state.started = false;
+      state.index = -1;
+      state.turn = 0;
+      state.locked = false;
+      state.answeredCorrectly = false;
+
+      state.scoreA = 0; state.scoreB = 0;
+      state.rightA = 0; state.rightB = 0;
+      state.wrongA = 0; state.wrongB = 0;
+
+      updateScoreUI();
+      updateTopUI();
+
+      answersBox.innerHTML = '';
+      qNum.textContent = "Нажмите «Начать игру»";
+      qText.textContent = "Здесь появится вопрос и варианты ответа.";
+      btnStart.disabled = false;
+      btnNext.disabled = true;
+      finishBox.classList.remove('show');
+      setStatus(null, "Нажмите «Начать игру».");
+    }
+
+    btnStart.addEventListener('click', startGame);
+    btnNext.addEventListener('click', nextQuestion);
+    btnReset.addEventListener('click', resetGame);
+
+    updateScoreUI();
+    updateTopUI();
+  </script>
+</body>
+</html>
